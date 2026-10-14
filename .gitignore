@@ -6,3 +6,4 @@ target/
 .settings/
 .env
 .DS_Store
+.vscode
