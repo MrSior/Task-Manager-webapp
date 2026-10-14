@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Task Manager</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <section id="auth-screen" class="screen">
+      <div class="auth-panel">
+        <h1>Task Manager</h1>
+        <div class="tabs">
+          <button type="button" id="tab-login" class="tab active">Вход</button>
+          <button type="button" id="tab-register" class="tab">Регистрация</button>
+        </div>
+        <form id="auth-form">
+          <label>
+            Логин
+            <input id="auth-login" name="login" type="text" required autocomplete="username" />
+          </label>
+          <label>
+            Пароль
+            <input id="auth-password" name="password" type="password" required autocomplete="current-password" />
+          </label>
+          <p id="auth-error" class="error" hidden></p>
+          <button type="submit" id="auth-submit">Войти</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="board-screen" class="screen" hidden>
+      <header class="board-header">
+        <div>
+          <h1>Мои задачи</h1>
+          <p class="subtitle">Пользователь: <span id="current-user"></span></p>
+        </div>
+        <button type="button" id="logout-btn" class="secondary">Выйти</button>
+      </header>
+
+      <form id="create-task-form" class="create-form">
+        <input id="task-title" type="text" placeholder="Название задачи" required maxlength="255" />
+        <input id="task-description" type="text" placeholder="Описание" maxlength="10000" />
+        <button type="submit">Добавить</button>
+      </form>
+      <p id="board-error" class="error" hidden></p>
+
+      <div class="board">
+        <div class="column" data-status="NEW">
+          <h2>Новые</h2>
+          <div class="task-list" data-dropzone="NEW"></div>
+        </div>
+        <div class="column" data-status="IN_PROGRESS">
+          <h2>В работе</h2>
+          <div class="task-list" data-dropzone="IN_PROGRESS"></div>
+        </div>
+        <div class="column" data-status="DONE">
+          <h2>Выполнены</h2>
+          <div class="task-list" data-dropzone="DONE"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
