@@ -5,6 +5,8 @@ server:
 spring:
   application:
     name: task-manager
+  main:
+    banner-mode: off
   lifecycle:
     timeout-per-shutdown-phase: 30s
   datasource:
@@ -39,9 +41,6 @@ management:
     readinessstate:
       enabled: true
 
-logging:
-  pattern:
-    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %-5level [%thread] %logger{36} - %msg%n"
 
 app:
   process-type: ${APP_PROCESS_TYPE:web}

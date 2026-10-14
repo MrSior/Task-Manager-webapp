@@ -42,7 +42,7 @@ Graceful shutdown по SIGTERM включён (`server.shutdown=graceful`).
 
 Данные переживают перезапуск благодаря volume `pgdata`.
 
-Логи пишутся в stdout.
+Логи пишутся в stdout в JSON (одна строка = один event): `timestamp`, `level`, `message`, `service.name`, а также `logger`, `thread`, `service.version`, `service.instance.id` (hostname/pod), `process.type`, при HTTP — `http.method` / `http.path` / `http.status_code` / `http.duration_ms`.
 
 ## API
 
