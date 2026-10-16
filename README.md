@@ -2,6 +2,8 @@
 
 Веб-менеджер задач: Spring Boot API + простой HTML/CSS/JS фронт + PostgreSQL.
 
+## [Отчёт](Отчёт.md)
+
 ## Быстрый старт
 
 ```bash
