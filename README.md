@@ -4,6 +4,8 @@
 
 ## [Отчёт](Отчёт.md)
 
+## Полная инструкция подъёма в Minikube — в [Отчёт.md](Отчёт.md).
+
 ## Быстрый старт
 
 ```bash
@@ -67,6 +69,9 @@ Graceful shutdown по SIGTERM включён (`server.shutdown=graceful`).
 ```
 backend/     Spring Boot + Maven
 frontend/    HTML + CSS + JS (nginx)
+k8s/         манифесты (application / logging / metrics)
 docker-compose.yml
 ```
+
+Полная инструкция подъёма в Minikube — в [Отчёт.md](Отчёт.md).
 # Task-Manager-webapp

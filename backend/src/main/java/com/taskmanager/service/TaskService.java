@@ -6,6 +6,7 @@ import com.taskmanager.domain.User;
 import com.taskmanager.dto.CreateTaskRequest;
 import com.taskmanager.dto.TaskResponse;
 import com.taskmanager.dto.UpdateTaskRequest;
+import com.taskmanager.metrics.AppMetrics;
 import com.taskmanager.repository.TaskRepository;
 import com.taskmanager.security.AuthContext;
 import java.util.List;
@@ -18,9 +19,11 @@ import org.springframework.web.server.ResponseStatusException;
 public class TaskService {
 
     private final TaskRepository taskRepository;
+    private final AppMetrics appMetrics;
 
-    public TaskService(TaskRepository taskRepository) {
+    public TaskService(TaskRepository taskRepository, AppMetrics appMetrics) {
         this.taskRepository = taskRepository;
+        this.appMetrics = appMetrics;
     }
 
     @Transactional(readOnly = true)
@@ -39,7 +42,9 @@ public class TaskService {
         task.setTitle(request.getTitle().trim());
         task.setDescription(normalizeDescription(request.getDescription()));
         task.setStatus(TaskStatus.NEW);
-        return TaskResponse.from(taskRepository.save(task));
+        TaskResponse response = TaskResponse.from(taskRepository.save(task));
+        appMetrics.incTasksCreated();
+        return response;
     }
 
     @Transactional
@@ -59,7 +64,11 @@ public class TaskService {
             task.setDescription(normalizeDescription(request.getDescription()));
         }
         if (request.getStatus() != null) {
+            TaskStatus previous = task.getStatus();
             task.setStatus(request.getStatus());
+            if (request.getStatus() == TaskStatus.DONE && previous != TaskStatus.DONE) {
+                appMetrics.incTasksCompleted();
+            }
         }
 
         return TaskResponse.from(taskRepository.save(task));

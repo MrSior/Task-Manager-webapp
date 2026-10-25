@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgres
+  namespace: application
 spec:
   serviceName: task-manager-postgres
   replicas: 1
@@ -12,6 +13,10 @@ spec:
     metadata:
       labels:
         app: postgres
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9187"
+        prometheus.io/path: "/metrics"
     spec:
       containers:
         - name: postgres
@@ -50,6 +55,24 @@ spec:
               command: ["pg_isready", "-U", "taskmanager", "-d", "taskmanager"]
             initialDelaySeconds: 30
             periodSeconds: 10
+        - name: postgres-exporter
+          image: prometheuscommunity/postgres-exporter:v0.15.0
+          ports:
+            - name: metrics
+              containerPort: 9187
+          env:
+            - name: DATA_SOURCE_URI
+              value: "localhost:5432/taskmanager?sslmode=disable"
+            - name: DATA_SOURCE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: task-manager-secret
+                  key: postgres_user
+            - name: DATA_SOURCE_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: task-manager-secret
+                  key: postgres_password
   volumeClaimTemplates:
     - metadata:
         name: data

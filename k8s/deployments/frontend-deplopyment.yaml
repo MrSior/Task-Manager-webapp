@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: task-manager-frontend
+  namespace: application
 spec:
   replicas: 1
   selector:
@@ -39,4 +40,3 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 3
             failureThreshold: 5
-        

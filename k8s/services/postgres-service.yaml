@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: task-manager-postgres
+  namespace: application
   labels:
     app: task-manager-postgres
 spec:
@@ -12,3 +13,6 @@ spec:
     - name: postgres
       port: 5432
       targetPort: postgres
+    - name: metrics
+      port: 9187
+      targetPort: metrics

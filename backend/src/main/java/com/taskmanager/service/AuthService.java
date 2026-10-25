@@ -4,6 +4,7 @@ import com.taskmanager.domain.Session;
 import com.taskmanager.domain.User;
 import com.taskmanager.dto.AuthRequest;
 import com.taskmanager.dto.AuthResponse;
+import com.taskmanager.metrics.AppMetrics;
 import com.taskmanager.repository.SessionRepository;
 import com.taskmanager.repository.UserRepository;
 import com.taskmanager.security.PasswordEncoder;
@@ -19,14 +20,17 @@ public class AuthService {
     private final UserRepository userRepository;
     private final SessionRepository sessionRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AppMetrics appMetrics;
 
     public AuthService(
             UserRepository userRepository,
             SessionRepository sessionRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            AppMetrics appMetrics) {
         this.userRepository = userRepository;
         this.sessionRepository = sessionRepository;
         this.passwordEncoder = passwordEncoder;
+        this.appMetrics = appMetrics;
     }
 
     @Transactional
@@ -41,18 +45,20 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
 
+        appMetrics.incAuthRegistrations();
         return createSession(user);
     }
 
     @Transactional
     public AuthResponse login(AuthRequest request) {
-        User user = userRepository.findByLogin(request.getLogin().trim())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials"));
+        User user = userRepository.findByLogin(request.getLogin().trim()).orElse(null);
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            appMetrics.incAuthFailedLogins();
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
 
+        appMetrics.incAuthLogins();
         return createSession(user);
     }
 

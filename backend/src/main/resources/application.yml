@@ -29,7 +29,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health
+        include: health,prometheus
   endpoint:
     health:
       # Отдельные группы: /actuator/health/liveness и /actuator/health/readiness
@@ -40,6 +40,9 @@ management:
       enabled: true
     readinessstate:
       enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
 
 
 app:
