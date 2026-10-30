@@ -47,3 +47,5 @@ management:
 
 app:
   process-type: ${APP_PROCESS_TYPE:web}
+  # 0 = off; e.g. 0.3 for screencast (30% of /api/** → HTTP 500)
+  demo-fail-rate: ${APP_DEMO_FAIL_RATE:0}
