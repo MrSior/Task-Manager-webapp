@@ -1,0 +1,78 @@
+# Overlay: временно снижает пороги runtime-алертов для демо на Minikube.
+# Боевые пороги остаются в vmalert-values.yaml / alert-rules.yaml (0.85 / 0.8).
+#
+#   helm upgrade --install vmalert vm/victoria-metrics-alert -n metrics \
+#     -f k8s/metrics/vmalert-values.yaml \
+#     -f k8s/metrics/vmalert-values-demo-runtime.yaml
+#
+# Вернуть боевые:
+#   helm upgrade --install vmalert vm/victoria-metrics-alert -n metrics \
+#     -f k8s/metrics/vmalert-values.yaml
+server:
+  config:
+    alerts:
+      groups:
+        - name: task-manager-service
+          rules:
+            - alert: HttpAvailabilityLow
+              expr: |
+                (
+                  sum(rate(http_server_requests_seconds_count{namespace="application",status!~"5.."}[5m]))
+                  /
+                  sum(rate(http_server_requests_seconds_count{namespace="application"}[5m]))
+                ) < 0.99
+              for: 1m
+              labels:
+                severity: critical
+                service: task-manager
+                team: sre
+              annotations:
+                summary: "HTTP availability below SLO 99%"
+                description: "Доля не-5xx запросов упала ниже 0.99 (нарушение SLO-1)."
+            - alert: AuthFailureRateHigh
+              expr: |
+                (
+                  sum(rate(taskmanager_auth_logins_total[5m]))
+                  /
+                  (
+                    sum(rate(taskmanager_auth_logins_total[5m]))
+                    +
+                    sum(rate(taskmanager_auth_failed_logins_total[5m]))
+                  )
+                ) < 0.95
+              for: 1m
+              labels:
+                severity: warning
+                service: task-manager
+                team: sre
+              annotations:
+                summary: "Auth success rate below SLO 95%"
+                description: "Доля успешных логинов упала ниже 0.95 (нарушение SLO-2)."
+        - name: task-manager-runtime
+          rules:
+            - alert: JvmHeapUsageHigh
+              expr: |
+                (
+                  sum by (pod) (jvm_memory_used_bytes{namespace="application",area="heap"})
+                  /
+                  sum by (pod) (jvm_memory_max_bytes{namespace="application",area="heap"})
+                ) > 0.01
+              for: 30s
+              labels:
+                severity: warning
+                service: task-manager
+                team: sre
+              annotations:
+                summary: "JVM heap usage high on {{ $labels.pod }}"
+                description: "DEMO: heap > 1% на {{ $labels.pod }} (боевой порог 85%)."
+            - alert: ProcessCpuHigh
+              expr: |
+                max by (pod) (process_cpu_usage{namespace="application"}) > 0.0001
+              for: 30s
+              labels:
+                severity: warning
+                service: task-manager
+                team: sre
+              annotations:
+                summary: "Process CPU usage high on {{ $labels.pod }}"
+                description: "DEMO: process_cpu_usage > 0.0001 на {{ $labels.pod }} (боевой порог 0.8)."

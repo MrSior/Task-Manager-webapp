@@ -1,0 +1,143 @@
+# Helm values for vm/victoria-metrics-alert (vmalert + Alertmanager).
+# Install:
+#   kubectl -n metrics apply -f /tmp/am-telegram-secret.yaml   # from .example
+#   helm upgrade --install vmalert vm/victoria-metrics-alert \
+#     -n metrics -f k8s/metrics/vmalert-values.yaml
+#
+# If Telegram Secret is not created yet, comment out alertmanager.configSecret
+# and keep the inline alertmanager.config below (replace bot_token / chat_id).
+
+server:
+  datasource:
+    url: http://vmsingle-victoria-metrics-single-server.metrics.svc:8428
+  remoteWrite:
+    url: http://vmsingle-victoria-metrics-single-server.metrics.svc:8428
+  remoteRead:
+    url: http://vmsingle-victoria-metrics-single-server.metrics.svc:8428
+  # Rules mirror k8s/metrics/alert-rules.yaml (chart ConfigMap key: alert-rules.yaml)
+  config:
+    alerts:
+      groups:
+        - name: task-manager-service
+          rules:
+            - alert: HttpAvailabilityLow
+              expr: |
+                (
+                  sum(rate(http_server_requests_seconds_count{namespace="application",status!~"5.."}[5m]))
+                  /
+                  sum(rate(http_server_requests_seconds_count{namespace="application"}[5m]))
+                ) < 0.99
+              for: 1m
+              labels:
+                severity: critical
+                service: task-manager
+                team: sre
+              annotations:
+                summary: "HTTP availability below SLO 99%"
+                description: "Доля не-5xx запросов упала ниже 0.99 (нарушение SLO-1)."
+
+            - alert: AuthFailureRateHigh
+              expr: |
+                (
+                  sum(rate(taskmanager_auth_logins_total[5m]))
+                  /
+                  (
+                    sum(rate(taskmanager_auth_logins_total[5m]))
+                    +
+                    sum(rate(taskmanager_auth_failed_logins_total[5m]))
+                  )
+                ) < 0.95
+              for: 1m
+              labels:
+                severity: warning
+                service: task-manager
+                team: sre
+              annotations:
+                summary: "Auth success rate below SLO 95%"
+                description: "Доля успешных логинов упала ниже 0.95 (нарушение SLO-2)."
+
+        - name: task-manager-runtime
+          rules:
+            - alert: JvmHeapUsageHigh
+              expr: |
+                (
+                  sum by (pod) (jvm_memory_used_bytes{namespace="application",area="heap"})
+                  /
+                  sum by (pod) (jvm_memory_max_bytes{namespace="application",area="heap"})
+                ) > 0.85
+              for: 2m
+              labels:
+                severity: warning
+                service: task-manager
+                team: sre
+              annotations:
+                summary: "JVM heap usage high on {{ $labels.pod }}"
+                description: "Heap usage > 85% на поде {{ $labels.pod }} (риск OOM / GC thrashing). Боевой порог 0.85; для демо на Minikube временно снизьте (напр. 0.4)."
+
+            - alert: ProcessCpuHigh
+              expr: |
+                max by (pod) (process_cpu_usage{namespace="application"}) > 0.8
+              for: 2m
+              labels:
+                severity: warning
+                service: task-manager
+                team: sre
+              annotations:
+                summary: "Process CPU usage high on {{ $labels.pod }}"
+                description: "process_cpu_usage > 0.8 на поде {{ $labels.pod }} (перегрузка инстанса). Боевой порог 0.8; для демо временно снизьте (напр. 0.05)."
+
+alertmanager:
+  enabled: true
+  # Prefer external Secret with Telegram credentials:
+  #   kubectl -n metrics apply -f /tmp/am-telegram-secret.yaml  # from .example
+  # then set:
+  configSecret: alertmanager-telegram-config
+  # (chart ignores inline config when configSecret is set).
+  #
+  # Inline default: Telegram receiver (replace bot_token / chat_id) + local webhook
+  # for demos without a bot (see k8s/metrics/webhook-logger.yaml).
+  config:
+    global:
+      resolve_timeout: 5m
+    route:
+      receiver: telegram
+      group_by: ["alertname", "severity"]
+      group_wait: 15s
+      group_interval: 1m
+      repeat_interval: 2h
+      routes:
+        - matchers:
+            - severity = critical
+          receiver: telegram
+          group_wait: 10s
+          continue: true
+        - matchers:
+            - severity =~ "critical|warning"
+          receiver: webhook-logger
+        - matchers:
+            - severity = warning
+          receiver: telegram
+    receivers:
+      - name: telegram
+        telegram_configs:
+          # Replace before real delivery (chat_id must be non-zero for AM to start).
+          - bot_token: "REPLACE_BOT_TOKEN"
+            chat_id: 123456789
+            parse_mode: HTML
+            message: |
+              <b>{{ .Status | toUpper }}</b>: {{ .CommonLabels.alertname }}
+              severity={{ .CommonLabels.severity }}
+              {{ range .Alerts -}}
+              • {{ .Annotations.summary }}
+                {{ .Annotations.description }}
+              {{ end }}
+      - name: webhook-logger
+        webhook_configs:
+          - url: http://alert-webhook-logger.metrics.svc:8080/webhook
+            send_resolved: true
+    inhibit_rules:
+      - source_matchers:
+          - severity = critical
+        target_matchers:
+          - severity = warning
+        equal: ["alertname", "service"]

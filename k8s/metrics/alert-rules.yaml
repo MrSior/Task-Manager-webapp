@@ -1,0 +1,71 @@
+# Alerting rules for vmalert (Prometheus-compatible).
+# Deployed via victoria-metrics-alert Helm values (server.config.alerts)
+# or as a standalone ConfigMap (key: alert-rules.yaml).
+groups:
+  - name: task-manager-service
+    rules:
+      - alert: HttpAvailabilityLow
+        expr: |
+          (
+            sum(rate(http_server_requests_seconds_count{namespace="application",status!~"5.."}[5m]))
+            /
+            sum(rate(http_server_requests_seconds_count{namespace="application"}[5m]))
+          ) < 0.99
+        for: 1m
+        labels:
+          severity: critical
+          service: task-manager
+          team: sre
+        annotations:
+          summary: "HTTP availability below SLO 99%"
+          description: "Доля не-5xx запросов упала ниже 0.99 (нарушение SLO-1)."
+
+      - alert: AuthFailureRateHigh
+        expr: |
+          (
+            sum(rate(taskmanager_auth_logins_total[5m]))
+            /
+            (
+              sum(rate(taskmanager_auth_logins_total[5m]))
+              +
+              sum(rate(taskmanager_auth_failed_logins_total[5m]))
+            )
+          ) < 0.95
+        for: 1m
+        labels:
+          severity: warning
+          service: task-manager
+          team: sre
+        annotations:
+          summary: "Auth success rate below SLO 95%"
+          description: "Доля успешных логинов упала ниже 0.95 (нарушение SLO-2)."
+
+  - name: task-manager-runtime
+    rules:
+      - alert: JvmHeapUsageHigh
+        expr: |
+          (
+            sum by (pod) (jvm_memory_used_bytes{namespace="application",area="heap"})
+            /
+            sum by (pod) (jvm_memory_max_bytes{namespace="application",area="heap"})
+          ) > 0.85
+        for: 2m
+        labels:
+          severity: warning
+          service: task-manager
+          team: sre
+        annotations:
+          summary: "JVM heap usage high on {{ $labels.pod }}"
+          description: "Heap usage > 85% на поде {{ $labels.pod }} (риск OOM / GC thrashing)."
+
+      - alert: ProcessCpuHigh
+        expr: |
+          max by (pod) (process_cpu_usage{namespace="application"}) > 0.8
+        for: 2m
+        labels:
+          severity: warning
+          service: task-manager
+          team: sre
+        annotations:
+          summary: "Process CPU usage high on {{ $labels.pod }}"
+          description: "process_cpu_usage > 0.8 на поде {{ $labels.pod }} (перегрузка инстанса)."
