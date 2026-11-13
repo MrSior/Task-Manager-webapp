@@ -1,0 +1,71 @@
+# Grafana for Task Manager (ns metrics)
+# Install:
+#   helm repo add grafana https://grafana.github.io/helm-charts
+#   helm upgrade --install grafana grafana/grafana \
+#     -n metrics \
+#     -f k8s/metrics/grafana-values.yaml
+
+adminUser: admin
+adminPassword: admin
+
+persistence:
+  enabled: false
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: VictoriaMetrics
+        type: prometheus
+        access: proxy
+        url: http://vmsingle-victoria-metrics-single-server.metrics.svc:8428
+        isDefault: true
+        editable: true
+        jsonData:
+          timeInterval: 15s
+          httpMethod: POST
+
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+      - name: default
+        orgId: 1
+        folder: Task Manager
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/default
+
+# Dashboards provisioned via ConfigMaps labeled grafana_dashboard=1:
+#   grafana-dashboard-task-manager.yaml
+#   grafana-dashboard-postgres.yaml  (grafana.com/dashboards/9628)
+# Keep empty provider folder for chart compatibility; content comes from sidecar.
+dashboards: {}
+
+sidecar:
+  dashboards:
+    enabled: true
+    label: grafana_dashboard
+    labelValue: "1"
+    searchNamespace: ALL
+    folder: /tmp/dashboards
+    provider:
+      name: sidecarProvider
+      orgId: 1
+      folder: Task Manager
+      disableDelete: false
+      allowUiUpdates: true
