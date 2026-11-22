@@ -13,6 +13,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=build /workspace/target/task-manager-backend-1.0.0.jar app.jar
 ENV SERVER_PORT=8080
+ENV APP_VERSION=1.0.0
 EXPOSE 8080
 HEALTHCHECK --interval=10s --timeout=3s --start-period=30s --retries=3 \
     CMD curl -fsS http://localhost:${SERVER_PORT}/actuator/health/readiness || exit 1

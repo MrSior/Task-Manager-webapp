@@ -1,0 +1,36 @@
+# A/B: header X-Audience: beta → v2; everyone else → v1
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: task-manager
+  namespace: application
+spec:
+  parentRefs:
+    - name: task-manager-gw
+  hostnames:
+    - app.test
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api
+          headers:
+            - name: X-Audience
+              value: beta
+      backendRefs:
+        - name: task-manager-backend-v2
+          port: 8080
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api
+      backendRefs:
+        - name: task-manager-backend-v1
+          port: 8080
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: task-manager-frontend
+          port: 3000

@@ -1,0 +1,150 @@
+deployment.apps/task-manager-backend scaled
+deployment.apps/task-manager-backend-v1 unchanged
+service/task-manager-backend-v1 unchanged
+deployment.apps/task-manager-backend-v2 unchanged
+service/task-manager-backend-v2 unchanged
+deployment.apps/task-manager-backend-v1 scaled
+deployment.apps/task-manager-backend-v2 scaled
+deployment "task-manager-backend-v1" successfully rolled out
+deployment "task-manager-backend-v2" successfully rolled out
+[2026-11-22T17:49:35Z] === Canary 90/10 ===
+httproute.gateway.networking.k8s.io/task-manager configured
+[2026-11-22T17:49:38Z] Probing 40 requests → http://app.test:8088/api/auth/login (canary-90-10)
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v2
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v2
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+# canary-90-10 @ 2026-11-22T17:49:38Z BASE_URL=http://app.test:8088
+# counts:
+  38 v1
+   2 v2
+[2026-11-22T17:49:38Z] === Canary 50/50 ===
+httproute.gateway.networking.k8s.io/task-manager configured
+[2026-11-22T17:49:41Z] Probing 40 requests → http://app.test:8088/api/auth/login (canary-50-50)
+v1
+v2
+v1
+v1
+v2
+v2
+v1
+v2
+v1
+v2
+v1
+v2
+v2
+v1
+v2
+v1
+v2
+v2
+v1
+v1
+v2
+v1
+v1
+v2
+v2
+v1
+v2
+v2
+v2
+v1
+v1
+v2
+v1
+v1
+v2
+v1
+v2
+v1
+v2
+v2
+# canary-50-50 @ 2026-11-22T17:49:42Z BASE_URL=http://app.test:8088
+# counts:
+  21 v2
+  19 v1
+[2026-11-22T17:49:42Z] === Canary 0/100 ===
+httproute.gateway.networking.k8s.io/task-manager configured
+[2026-11-22T17:49:45Z] Probing 40 requests → http://app.test:8088/api/auth/login (canary-0-100)
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+# canary-0-100 @ 2026-11-22T17:49:46Z BASE_URL=http://app.test:8088
+# counts:
+  40 v2
+[2026-11-22T17:49:46Z] Canary done

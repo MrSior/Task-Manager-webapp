@@ -1,0 +1,26 @@
+# Base route: frontend + backend (v1). Used as default / Rolling baseline.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: task-manager
+  namespace: application
+spec:
+  parentRefs:
+    - name: task-manager-gw
+  hostnames:
+    - app.test
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api
+      backendRefs:
+        - name: task-manager-backend
+          port: 8080
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: task-manager-frontend
+          port: 3000

@@ -2,6 +2,7 @@
 <configuration>
     <springProperty scope="context" name="serviceName" source="spring.application.name" defaultValue="task-manager"/>
     <springProperty scope="context" name="processType" source="app.process-type" defaultValue="web"/>
+    <springProperty scope="context" name="serviceVersion" source="app.version" defaultValue="1.0.0"/>
     <property name="HOSTNAME" value="${HOSTNAME:-unknown}"/>
 
     <!-- JSON в stdout — формат для сбора логов в k8s -->
@@ -32,7 +33,7 @@
                     <pattern>
                         {
                           "service.name": "${serviceName}",
-                          "service.version": "1.0.0",
+                          "service.version": "${serviceVersion}",
                           "service.instance.id": "${HOSTNAME}",
                           "process.type": "${processType}"
                         }

@@ -69,8 +69,18 @@ Graceful shutdown по SIGTERM включён (`server.shutdown=graceful`).
 ```
 backend/     Spring Boot + Maven
 frontend/    HTML + CSS + JS (nginx)
-k8s/         манифесты (application / logging / metrics)
+k8s/         манифесты (application / logging / metrics / gateway)
+scripts/     sli-demo.sh, strategy-demo.sh
 docker-compose.yml
+```
+
+## Стратегии развёртывания (Envoy Gateway)
+
+См. [k8s/gateway/README.md](k8s/gateway/README.md) и раздел в [Отчёт.md](Отчёт.md).
+
+```bash
+export BASE_URL=http://app.test:8088
+./scripts/strategy-demo.sh rolling|bluegreen|canary|ab|shadow
 ```
 
 Полная инструкция подъёма в Minikube — в [Отчёт.md](Отчёт.md).

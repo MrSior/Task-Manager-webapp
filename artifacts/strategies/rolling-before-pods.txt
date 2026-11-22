@@ -1,0 +1,4 @@
+NAME                                    READY   STATUS        RESTARTS   AGE     IP             NODE       NOMINATED NODE   READINESS GATES
+task-manager-backend-56c5dcbdc7-2p5gq   1/1     Running       0          10s     10.244.0.119   minikube   <none>           <none>
+task-manager-backend-56c5dcbdc7-svxzb   1/1     Running       0          21s     10.244.0.118   minikube   <none>           <none>
+task-manager-backend-6b69bdb66f-cncrq   1/1     Terminating   0          4h20m   10.244.0.116   minikube   <none>           <none>

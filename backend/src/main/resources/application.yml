@@ -43,9 +43,11 @@ management:
   metrics:
     tags:
       application: ${spring.application.name}
+      version: ${APP_VERSION:1.0.0}
 
 
 app:
   process-type: ${APP_PROCESS_TYPE:web}
+  version: ${APP_VERSION:1.0.0}
   # 0 = off; e.g. 0.3 for screencast (30% of /api/** → HTTP 500)
   demo-fail-rate: ${APP_DEMO_FAIL_RATE:0}

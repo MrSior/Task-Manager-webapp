@@ -1,0 +1,145 @@
+[2026-11-22T17:44:44Z] === Rolling: scale down versioned backends; primary on v1 ===
+deployment.apps/task-manager-backend-v1 scaled
+deployment.apps/task-manager-backend-v2 scaled
+httproute.gateway.networking.k8s.io/task-manager configured
+deployment.apps/task-manager-backend configured
+deployment.apps/task-manager-backend scaled
+Waiting for deployment "task-manager-backend" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "task-manager-backend" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "task-manager-backend" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "task-manager-backend" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "task-manager-backend" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "task-manager-backend" rollout to finish: 1 old replicas are pending termination...
+deployment "task-manager-backend" successfully rolled out
+NAME                                    READY   STATUS        RESTARTS   AGE     IP             NODE       NOMINATED NODE   READINESS GATES
+task-manager-backend-56c5dcbdc7-2p5gq   1/1     Running       0          10s     10.244.0.119   minikube   <none>           <none>
+task-manager-backend-56c5dcbdc7-svxzb   1/1     Running       0          21s     10.244.0.118   minikube   <none>           <none>
+task-manager-backend-6b69bdb66f-cncrq   1/1     Terminating   0          4h20m   10.244.0.116   minikube   <none>           <none>
+[2026-11-22T17:45:05Z] Probing 40 requests → http://app.test:8088/api/auth/login (rolling-before)
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+# rolling-before @ 2026-11-22T17:45:06Z BASE_URL=http://app.test:8088
+# counts:
+  40 v1
+[2026-11-22T17:45:06Z] === Rolling: set image v1 → v2 (watch pods) ===
+deployment.apps/task-manager-backend image updated
+deployment.apps/task-manager-backend env updated
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v1
+v2
+v1
+v2
+v1
+Waiting for deployment "task-manager-backend" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "task-manager-backend" rollout to finish: 1 old replicas are pending termination...
+deployment "task-manager-backend" successfully rolled out
+NAME                                    READY   STATUS        RESTARTS   AGE   IP             NODE       NOMINATED NODE   READINESS GATES
+task-manager-backend-56c5dcbdc7-svxzb   1/1     Terminating   0          44s   10.244.0.118   minikube   <none>           <none>
+task-manager-backend-6b69bdb66f-fcr57   1/1     Running       0          11s   10.244.0.121   minikube   <none>           <none>
+task-manager-backend-6b69bdb66f-w7dgp   1/1     Running       0          22s   10.244.0.120   minikube   <none>           <none>
+[2026-11-22T17:45:28Z] Probing 40 requests → http://app.test:8088/api/auth/login (rolling-after)
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+v2
+# rolling-after @ 2026-11-22T17:45:29Z BASE_URL=http://app.test:8088
+# counts:
+  40 v2
+deployment.apps/task-manager-backend 
+REVISION  CHANGE-CAUSE
+2         <none>
+8         <none>
+13        <none>
+14        <none>
+22        <none>
+23        <none>
+24        <none>
+25        <none>
+35        <none>
+36        <none>
+37        <none>
+
+[2026-11-22T17:45:29Z] Rolling done

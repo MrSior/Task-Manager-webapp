@@ -1,0 +1,4 @@
+# canary-50-50 @ 2026-11-22T17:49:42Z BASE_URL=http://app.test:8088
+# counts:
+  21 v2
+  19 v1
